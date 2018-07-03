@@ -111,7 +111,7 @@ get_downlink_data_delay="100ms"
   # * KR_920_923
   # * RU_864_870
   # * US_902_928
-  name="EU_863_870"
+  name="CN_470_510"
 
   # Enforce 400ms dwell time
   #

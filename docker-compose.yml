@@ -2,23 +2,34 @@ version: "2"
 
 services:
   loraserver:
-    image: loraserver/loraserver:1
+    image: hub.lpwan-thu.top/loraserver
     volumes:
       - ./configuration/loraserver:/etc/loraserver
+    networks:
+      - back
 
   appserver:
-    image: loraserver/lora-app-server:1
+    image: hub.lpwan-thu.top/appserver
     ports:
       - 8080:8080
     volumes:
       - ./configuration/lora-app-server:/etc/lora-app-server
+    networks:
+      - proxy-network
+      - back
+    environment:
+      - VIRTUAL_PROTO=https
+      - VIRTUA_PORT=443
+      - VIRTUAL_HOST=loraserver.${DOMAIN}
 
   gatewaybridge:
-    image: loraserver/lora-gateway-bridge:2
+    image: hub.lpwan-thu.top/gatewaybridge
     ports:
       - 1700:1700/udp
     volumes:
       - ./configuration/lora-gateway-bridge:/etc/lora-gateway-bridge
+    networks:
+      - back
   
   postgresql:
     image: postgres:9.6-alpine
@@ -27,6 +38,8 @@ services:
     volumes:
       - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
       - ./data/postgresql:/var/lib/postgresql/data
+    networks:
+      - back
 
   redis:
     ports:
@@ -34,8 +47,19 @@ services:
     image: redis:4-alpine
     volumes:
       - ./data/redis:/data
+    networks:
+      - back
 
   mosquitto:
     image: eclipse-mosquitto
     ports:
       - 1883:1883
+    networks:
+      - back
+
+networks:
+  proxy-network:
+    external:
+      name: proxy-network
+  back:
+    driver: bridge
